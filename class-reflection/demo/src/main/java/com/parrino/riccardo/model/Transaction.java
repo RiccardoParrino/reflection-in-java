@@ -10,11 +10,10 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class Order extends Transaction{
-    private Long orderId;
-    private Long customerId;
-    private Double price;
+@NoArgsConstructor
+public class Transaction {
+    private Long transactionId;
+    private Long locationId;
+    private Date date;
 }

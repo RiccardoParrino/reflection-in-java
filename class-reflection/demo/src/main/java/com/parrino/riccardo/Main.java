@@ -1,9 +1,9 @@
 package com.parrino.riccardo;
 
-import com.parrino.riccardo.reflectionClassOperation.GetClassExample;
+import com.parrino.riccardo.discoveringClassMembersExample.withinClass.MethodsExample;
 
 public class Main {
     public static void main(String[] args) {
-        GetClassExample.getSimpleNameExample();
+        MethodsExample.getDeclaredMethods();
     }
 }
