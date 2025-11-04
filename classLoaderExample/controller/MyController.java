@@ -1,6 +1,7 @@
 package classLoaderExample.controller;
 
 import classLoaderExample.annotations.Bean;
+import classLoaderExample.annotations.Controller;
 import classLoaderExample.annotations.GetMapping;
 import classLoaderExample.annotations.Inject;
 import classLoaderExample.annotations.PostMapping;
@@ -8,6 +9,7 @@ import classLoaderExample.model.Order;
 import classLoaderExample.service.MyService;
 
 @Bean
+@Controller
 public class MyController {
     
     @Inject

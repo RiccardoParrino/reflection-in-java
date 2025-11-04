@@ -4,16 +4,22 @@ import java.io.File;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.parrino.riccardo.repository.OrderRepository;
 
+import classLoaderExample.annotations.Controller;
+import classLoaderExample.annotations.GetMapping;
 import classLoaderExample.annotations.Inject;
+import classLoaderExample.annotations.PostMapping;
 import classLoaderExample.controller.MyController;
 import classLoaderExample.model.Order;
 import classLoaderExample.repository.MyRepository;
@@ -32,6 +38,9 @@ public class Main {
     
     public static void main (String [] args) throws Exception {
         List<Object> applicationContext = MyFramework.run("classLoaderExample");
+        MyDispatcherServlet myDispatcherServlet = new MyDispatcherServlet();
+        myDispatcherServlet.register(applicationContext);
+        myDispatcherServlet.printAllEndpoint();
 
         MyController myController = (MyController) applicationContext.get(2);
         Order order1 = new Order().setName("firstOrder");
@@ -41,6 +50,37 @@ public class Main {
         myController.createOrder(order2);
         myController.createOrder(order3);
         myController.printOrder();
+    }
+
+}
+
+class MyDispatcherServlet {
+
+    private Map<String, Method> register = new HashMap<>();
+
+    public void listen() {
+        
+    }
+
+    public void register(List<Object> applicationContext) {
+        for ( Object o : applicationContext ) {
+            if (o.getClass().getAnnotation(Controller.class) != null) {
+                for(Method method : o.getClass().getMethods()) {
+                    if ( method.getAnnotation(GetMapping.class) != null ) {
+                        String methodEndpoint = method.getAnnotation(GetMapping.class).name();
+                        register.put(methodEndpoint, method);
+                    }
+                    if ( method.getAnnotation(PostMapping.class) != null ) {
+                        String methodEndpoint = method.getAnnotation(PostMapping.class).name();
+                        register.put(methodEndpoint, method);
+                    }
+                }
+            }
+        }
+    }
+
+    public void printAllEndpoint() {
+        register.keySet().forEach(System.out::println);
     }
 
 }
