@@ -12,9 +12,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.stream.Collectors;
-
-import com.parrino.riccardo.repository.OrderRepository;
 
 import classLoaderExample.annotations.Controller;
 import classLoaderExample.annotations.GetMapping;
@@ -22,8 +21,6 @@ import classLoaderExample.annotations.Inject;
 import classLoaderExample.annotations.PostMapping;
 import classLoaderExample.controller.MyController;
 import classLoaderExample.model.Order;
-import classLoaderExample.repository.MyRepository;
-import classLoaderExample.service.MyService;
 
 public class Main {
 
@@ -49,17 +46,55 @@ public class Main {
         myController.createOrder(order1);
         myController.createOrder(order2);
         myController.createOrder(order3);
-        myController.printOrder();
+
+        myDispatcherServlet.listen();
     }
 
 }
 
 class MyDispatcherServlet {
 
-    private Map<String, Method> register = new HashMap<>();
+    private Map<String, ObjectMethodReference> register = new HashMap<>();
 
-    public void listen() {
-        
+    class ObjectMethodReference {
+
+        private Object object;
+        private Method method;
+
+        public Object getObject() {
+            return this.object;
+        }
+
+        public ObjectMethodReference setObject(Object object) {
+            this.object = object;
+            return this;
+        }
+
+        public Method getMethod() {
+            return method;
+        }
+
+        public ObjectMethodReference setMethod(Method method) {
+            this.method = method;
+            return this;
+        }
+
+    }
+
+    // blocking style listener
+    public void listen () throws IllegalAccessException, InvocationTargetException {
+        Scanner scanner = new Scanner(System.in);
+        while(true) {
+            try {
+                String inputLine = scanner.nextLine();
+                String methodName = inputLine.split(" ")[0];
+                
+                ObjectMethodReference objectMethodReference = register.get(methodName);
+                objectMethodReference.getMethod().invoke(objectMethodReference.getObject());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public void register(List<Object> applicationContext) {
@@ -68,11 +103,11 @@ class MyDispatcherServlet {
                 for(Method method : o.getClass().getMethods()) {
                     if ( method.getAnnotation(GetMapping.class) != null ) {
                         String methodEndpoint = method.getAnnotation(GetMapping.class).name();
-                        register.put(methodEndpoint, method);
+                        register.put(methodEndpoint, new ObjectMethodReference().setMethod(method).setObject(o));
                     }
                     if ( method.getAnnotation(PostMapping.class) != null ) {
                         String methodEndpoint = method.getAnnotation(PostMapping.class).name();
-                        register.put(methodEndpoint, method);
+                        register.put(methodEndpoint, new ObjectMethodReference().setMethod(method).setObject(o));
                     }
                 }
             }
