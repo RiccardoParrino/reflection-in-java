@@ -1,9 +1,9 @@
 package com.parrino.riccardo;
 
-import com.parrino.riccardo.discoveringClassMembersExample.withinClass.MethodsExample;
+import com.parrino.riccardo.discoveringClassMembersExample.withinClass.ConstructorsExample;
 
 public class Main {
     public static void main(String[] args) {
-        MethodsExample.getDeclaredMethods();
+        ConstructorsExample.getDeclaredConstructorExample();
     }
 }
