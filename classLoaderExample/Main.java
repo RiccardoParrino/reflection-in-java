@@ -31,7 +31,24 @@ public class Main {
     // instantiate classes
     
     public static void main (String [] args) throws Exception {
-        List<File> files = ClassDiscovererService.run("classLoaderExample"); // find files
+        List<Object> applicationContext = MyFramework.run("classLoaderExample");
+
+        MyController myController = (MyController) applicationContext.get(2);
+        Order order1 = new Order().setName("firstOrder");
+        Order order2 = new Order().setName("secondOrder");
+        Order order3 = new Order().setName("thirdOrder");
+        myController.createOrder(order1);
+        myController.createOrder(order2);
+        myController.createOrder(order3);
+        myController.printOrder();
+    }
+
+}
+
+class MyFramework {
+
+    public static List<Object> run (String pathname) throws Exception {
+        List<File> files = ClassDiscovererService.run(pathname); // find files
         // files.remove("Main.java"); // filter out Main.java file
         List<Class<?>> clazz = ClassLoaderService.run(files); // find object
         List<Class<?>> beans = FilterBeans.run(clazz); // find beans
@@ -48,17 +65,7 @@ public class Main {
             return null;
         }).collect(Collectors.toList()); // instantiate bean
         DependencyInjectionResolver.run(applicationContext); // satisfy dependency injection
-
-        MyRepository myRepository = (MyRepository) applicationContext.get(0);
-        MyService myService = (MyService) applicationContext.get(1);
-        MyController myController = (MyController) applicationContext.get(2);
-        Order order1 = new Order().setName("firstOrder");
-        Order order2 = new Order().setName("secondOrder");
-        Order order3 = new Order().setName("thirdOrder");
-        myController.createOrder(order1);
-        myController.createOrder(order2);
-        myController.createOrder(order3);
-        myController.printOrder();
+        return applicationContext;
     }
 
 }
