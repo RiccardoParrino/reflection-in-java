@@ -11,7 +11,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.parrino.riccardo.repository.OrderRepository;
+
 import classLoaderExample.annotations.Inject;
+import classLoaderExample.controller.MyController;
+import classLoaderExample.model.Order;
+import classLoaderExample.repository.MyRepository;
+import classLoaderExample.service.MyService;
 
 public class Main {
 
@@ -41,13 +47,37 @@ public class Main {
             }
             return null;
         }).collect(Collectors.toList()); // instantiate bean
+        DependencyInjectionResolver.run(applicationContext); // satisfy dependency injection
 
-        // topsort incorrect
-        System.out.println();
-        topsort.forEach(s -> System.out.print(s + " -> "));
+        MyRepository myRepository = (MyRepository) applicationContext.get(0);
+        MyService myService = (MyService) applicationContext.get(1);
+        MyController myController = (MyController) applicationContext.get(2);
+        Order order1 = new Order().setName("firstOrder");
+        Order order2 = new Order().setName("secondOrder");
+        Order order3 = new Order().setName("thirdOrder");
+        myController.createOrder(order1);
+        myController.createOrder(order2);
+        myController.createOrder(order3);
+        myController.printOrder();
+    }
 
-        System.out.println();
-        reorderBeans.forEach(s -> System.out.print(s.getSimpleName() + " -> "));
+}
+
+class DependencyInjectionResolver {
+
+    public static void run (List<Object> applicationContext) throws IllegalArgumentException, IllegalAccessException {
+        for ( Object bean : applicationContext ) {
+            for (Field f : bean.getClass().getDeclaredFields()) {
+                if (f.getAnnotation(Inject.class) != null) {
+                    f.setAccessible(true);
+                    for ( Object o : applicationContext ) {
+                        if (o.getClass().getSimpleName().equals(f.getType().getSimpleName())) {
+                            f.set(bean,o);
+                        }
+                    }
+                }   
+            }
+        }
     }
 
 }
@@ -99,11 +129,9 @@ class DAGBuilder {
         }
 
         for ( int i = 0; i < beans.size(); i++ ) {
-            System.out.println("Inspecting... " + beans.get(i).getSimpleName());
             Field[] fields = beans.get(i).getDeclaredFields();
 
             for ( Field field : fields ) {
-                System.out.println(field.getName());
                 if (field.getAnnotation(Inject.class) != null) {
                     for (int j = 0; j < beans.size(); j++) {
                         if (beans.get(j).getSimpleName().equals(field.getType().getSimpleName())) {

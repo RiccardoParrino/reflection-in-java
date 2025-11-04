@@ -11,4 +11,21 @@ public class Order {
         System.out.println("name: " + name);
         System.out.println("price: " + price);
     }
+
+    public Long getId() {
+        return this.id;
+    }
+
+    public Order setName(String name) {
+        this.name = name;
+        return this;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public Double getPrice() {
+        return this.price;
+    }
 }
